@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Represents a geographical point with various safety metrics
+model SafetyDataPoint {
+  id              String   @id @default(uuid())
+  lat             Float
+  lng             Float
+  
+  // Metrics for safety score calculation
+  cameraCount     Int      @default(0)   // Number of CCTV/security cameras nearby
+  crimeReports    Int      @default(0)   // Historical crime reports in the vicinity
+  lightingLevel   Int      @default(3)   // 1 (Poor) to 5 (Excellent) street lighting
+  peopleSurveyScore Float  @default(0)   // Aggregate community perceived safety score (0-100)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([lat, lng]) // Index for faster spatial/bounding box queries
+}
+
+// Represents a community-submitted safety report
+model SafetyReport {
+  id        String   @id @default(uuid())
+  lat       Float
+  lng       Float
+  comment   String
+  rating    Int      // 1-5 scale
+  author    String   @default("Anonymous")
+  createdAt DateTime @default(now())
+}
